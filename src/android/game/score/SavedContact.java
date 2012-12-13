@@ -12,7 +12,6 @@ public class SavedContact {
     public String toString() {
         StringBuilder sb = new StringBuilder(id);
         sb.append(",").append(displayName);
-        sb.append(",").append(hasPhone);
         if(hasPhone.equals("1")) {
             for(String number : phoneNumbers) {
                 sb.append(",").append(number);
