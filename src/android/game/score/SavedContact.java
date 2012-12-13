@@ -9,6 +9,23 @@ public class SavedContact {
     protected List<String> emails = new LinkedList<String>();
 
     @Override
+    public boolean equals(Object o) {
+
+        if(!(o instanceof SavedContact)) {
+            return false;
+        }
+
+        SavedContact sc = (SavedContact)o;
+        return id.equals(sc.id) && displayName.equals(sc.displayName);
+    }
+
+    @Override
+    public int hashCode() {
+        //danger: craptastic. do not rely upon for anything.
+        return id.hashCode() * 17 + displayName.hashCode() * 37;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(id);
         sb.append(",").append(displayName);
