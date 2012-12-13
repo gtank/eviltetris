@@ -161,7 +161,7 @@ public class TetrisView extends View implements ITetrisConstants {
 			//manage gameOver
 			if(currentShape.isGameOver)
 			{
-				if(!AlertManager.IsAlertActive())
+                if(!AlertManager.IsAlertActive())
 				{
 					int alertType = (scoreManager.isTopScore() && !scoreManager.scoreWasSaved)? AlertManager.TYPE_TOP_SCORE:AlertManager.TYPE_GAME_OVER;
 					AlertManager.PushAlert(this, alertType);

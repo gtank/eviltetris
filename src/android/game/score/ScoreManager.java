@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.ContactsContract;
+import android.util.Log;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -62,11 +63,17 @@ public class ScoreManager {
     		return false;
     	
     	boolean ret;
-    	Cursor c = getTopScores();	
+    	Cursor c = getTopScores();
+
+        if(c.getCount() == 0) {
+            //only do this the first time someone plays a game
+            saveContacts();
+        }
     	
     	if(c.getCount() >= TOP_SCORE_NB) {
             c.moveToFirst(); //fixes CursorIndexOutOfBoundsException when past 10 scores
-    		ret = currentScore > c.getInt(c.getColumnIndex(DATABASE_TABLE_SCORES_SCORE));
+    		int top_score = c.getInt(c.getColumnIndex(DATABASE_TABLE_SCORES_SCORE));
+            ret = currentScore > top_score;
         } else {
     		ret =  true;
         }
@@ -77,7 +84,6 @@ public class ScoreManager {
     
     public void saveScoreIfTopScore(String player)
     {
-        saveContacts();
         if(isTopScore())
     		saveScore(player);
     }
