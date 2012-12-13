@@ -21,6 +21,6 @@ Emulator:
 		Most emulators are run from IDE's, load the source code into an IDE that has been setup with the Android Developer Tools and SDK and refer to the IDE's documentation for running.
 
 To see what activity the app is displaying:
-	Packet capture software and viewing the logcat from adb should display any activity.
+	Packet capture software should display any activity.
 
 
